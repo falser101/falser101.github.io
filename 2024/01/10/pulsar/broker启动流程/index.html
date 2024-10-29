@@ -157,7 +157,7 @@
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="Update time"></i>
-          2024-09-11 14:38:01
+          2024-10-29 13:35:44
         </span>
         
               <span class="post-categories">
@@ -186,7 +186,7 @@
       <div class="markdown-body">
         <h1 id="Broker组件启动流程"><a href="#Broker组件启动流程" class="headerlink" title="Broker组件启动流程"></a>Broker组件启动流程</h1><p>在收发消息前，我们得启动Broker服务，本章将介绍Broker在启动阶段都做了什么。各个模块之前的关系，服务启动不同模块的初始化顺序。</p>
 <h2 id="服务启动"><a href="#服务启动" class="headerlink" title="服务启动"></a>服务启动</h2><p>使用bin目录下名为pulsar的CLI工具，执行命令时传入broker参数，会调用<code>PulsarBrokerStarter</code>这个类来启动Pulsar Broker服务。Broker总体启动流程如下图所示:</p>
-<p><img src="/imgs/pulsar/broker-startup/%E6%80%BB%E4%BD%93%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B.png" alt="pulsar-broker-startup"></p>
+<p><img src="/images/pulsar/broker-startup/%E6%80%BB%E4%BD%93%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B.png" alt="pulsar-broker-startup"></p>
 <ol>
 <li><p>加载配置文件。Broker启动时会读取conf&#x2F;broker.conf文件，并将其中的配置信息全部转化为Key&#x2F;Value的形式，通过反射创建一个<code>ServiceConfigration</code>对象。并且把值设置到这个对象的属性中。</p>
 </li>
@@ -235,7 +235,7 @@
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="Update time"></i>
-              2024-09-11 14:38:01
+              2024-10-29 13:35:44
             </span>
             
                   <span class="post-categories">
