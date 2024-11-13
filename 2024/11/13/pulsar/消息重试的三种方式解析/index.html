@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en" color-mode="light">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="John Doe" />
+  <!-- Open Graph Description 简短摘要-->
+  
+  <!-- 用于搜索引擎的文章摘要 -->
+  
+  
+  
+  <title>
+    
+      消息重试的三种方式解析 
+      
+      
+      |
+    
+     Hexo
+  </title>
+
+  
+    <link rel="apple-touch-icon" href="/images/favicon.png">
+    <link rel="icon" href="/images/favicon.png">
+  
+
+  <!-- Raleway-Font -->
+  <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- hexo site css -->
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_1886449_67xjft27j1l.css" />
+  <!-- 代码块风格 -->
+  
+
+  <!-- jquery3.3.1 -->
+  
+    <script defer type="text/javascript" src="/plugins/jquery.min.js"></script>
+  
+
+  <!-- fancybox -->
+  
+    <link href="/plugins/jquery.fancybox.min.css" rel="stylesheet">
+    <script defer type="text/javascript" src="/plugins/jquery.fancybox.min.js"></script>
+  
+  
+<script src="/js/fancybox.js"></script>
+
+
+  
+
+  
+
+  <script>
+    var html = document.documentElement
+    const colorMode = localStorage.getItem('color-mode')
+    if (colorMode) {
+      document.documentElement.setAttribute('color-mode', colorMode)
+    }
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+  <body>
+    <div id="app">
+      <div class="header">
+  <div class="avatar">
+    <a href="/">
+      <!-- 头像取消懒加载，添加no-lazy -->
+      
+        <img src="/images/avatar.png" alt="">
+      
+    </a>
+    <div class="nickname"><a href="/">Oranges</a></div>
+  </div>
+  <div class="navbar">
+    <ul>
+      
+        <li class="nav-item" data-path="/">
+          <a href="/">首页</a>
+        </li>
+      
+        <li class="nav-item" data-path="/archives/">
+          <a href="/archives/">归档</a>
+        </li>
+      
+        <li class="nav-item" data-path="/categories/">
+          <a href="/categories/">分类</a>
+        </li>
+      
+        <li class="nav-item" data-path="/tags/">
+          <a href="/tags/">标签</a>
+        </li>
+      
+        <li class="nav-item" data-path="/about/">
+          <a href="/about/">关于</a>
+        </li>
+      
+    </ul>
+  </div>
+</div>
+
+
+<script src="/js/activeNav.js"></script>
+
+
+
+      <div class="flex-container">
+        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
+<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
+
+
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
+
+
+  <!-- clipboard -->
+
+  
+    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
+  
+  
+<script src="/js/codeCopy.js"></script>
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title">消息重试的三种方式解析</div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="Update time"></i>
+          2024-11-13 11:22:42
+        </span>
+        
+              <span class="post-tags">
+                <i class="iconfont icon-tags mr-10" title="Tags"></i>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/pulsar/" title="pulsar">
+                    #pulsar
+                  </a>
+                </span>
+                
+              </span>
+          
+      </div>
+      <div class="markdown-body">
+        <pre><code>要利用消息重新交付，您需要在Broke重新发送Apache Pulsar客户端中未确认的消息之前启用此机制。可以使用三种方法激活Apache Pulsar中的消息重新传递机制。
+</code></pre>
+<h1 id="主动重试"><a href="#主动重试" class="headerlink" title="主动重试"></a>主动重试</h1><pre><code>重试主题允许您存储未能使用的消息，并在以后重试使用它们。使用此方法，可以自定义重新传递消息的间隔。原始主题的消费者也会自动订阅重试信主题。一旦达到最大重试次数，未使用的消息将被移动到死信主题进行手动处理。重试信主题的功能由使用者实现。
+![pulsar-broker-startup](/images/pulsar/message-redelivery/主动重试.svg)
+</code></pre>
+<h2 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">PulsarClient</span> <span class="variable">pulsarClient</span> <span class="operator">=</span> PulsarClient.builder().serviceUrl(<span class="string">&quot;pulsar://localhost:6650&quot;</span>).build();</span><br><span class="line"></span><br><span class="line">Consumer&lt;<span class="type">byte</span>[]&gt; consumer = pulsarClient.newConsumer() <span class="comment">//</span></span><br><span class="line">        .topic(<span class="string">&quot;persistent://my-tenant/my-ns/my-topic&quot;</span>) <span class="comment">//</span></span><br><span class="line">        .enableRetry(<span class="literal">true</span>)</span><br><span class="line">        .subscriptionName(<span class="string">&quot;my-subscription-name&quot;</span>).subscribe();</span><br><span class="line"></span><br><span class="line">Message&lt;<span class="type">byte</span>[]&gt; msg = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) &#123;</span><br><span class="line">    msg = consumer.receive();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Acknowledge the consumption of all messages at once</span></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    consumer.acknowledgeCumulative(msg);</span><br><span class="line">&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">    consumer.reconsumeLater(msg, <span class="number">10</span>, TimeUnit.SECONDS);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">pulsarClient.close();</span><br></pre></td></tr></table></figure>
+
+<h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><p><code>Consumer</code>接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">reconsumeLater</span><span class="params">(Message&lt;?&gt; message, <span class="type">long</span> delayTime, TimeUnit unit)</span> <span class="keyword">throws</span> PulsarClientException;</span><br></pre></td></tr></table></figure>
+
+<p>抽象类<code>ConsumerBase</code> 实现<code>reconsumeLater</code>接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">reconsumeLater</span><span class="params">(Message&lt;?&gt; message, <span class="type">long</span> delayTime, TimeUnit unit)</span> <span class="keyword">throws</span> PulsarClientException &#123;</span><br><span class="line">    reconsumeLater(message, <span class="literal">null</span>, delayTime, unit);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">reconsumeLater</span><span class="params">(Message&lt;?&gt; message, Map&lt;String, String&gt; customProperties, <span class="type">long</span> delayTime, TimeUnit unit)</span></span><br><span class="line">        <span class="keyword">throws</span> PulsarClientException &#123;</span><br><span class="line">    <span class="keyword">if</span> (!conf.isRetryEnable()) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">PulsarClientException</span>(RECONSUME_LATER_ERROR_MSG);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        reconsumeLaterAsync(message, customProperties, delayTime, unit).get();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">        Thread.currentThread().interrupt();</span><br><span class="line">        <span class="keyword">throw</span> PulsarClientException.unwrap(e);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> PulsarClientException.unwrap(e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> CompletableFuture&lt;Void&gt; <span class="title function_">reconsumeLaterAsync</span><span class="params">(</span></span><br><span class="line"><span class="params">        Message&lt;?&gt; message, Map&lt;String, String&gt; customProperties, <span class="type">long</span> delayTime, TimeUnit unit)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (!conf.isRetryEnable()) &#123;</span><br><span class="line">        <span class="keyword">return</span> FutureUtil.failedFuture(<span class="keyword">new</span> <span class="title class_">PulsarClientException</span>(RECONSUME_LATER_ERROR_MSG));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        validateMessageId(message);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (PulsarClientException e) &#123;</span><br><span class="line">        <span class="keyword">return</span> FutureUtil.failedFuture(e);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> doReconsumeLater(message, AckType.Individual, customProperties, delayTime, unit);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">abstract</span> CompletableFuture&lt;Void&gt; <span class="title function_">doReconsumeLater</span><span class="params">(Message&lt;?&gt; message, AckType ackType,</span></span><br><span class="line"><span class="params">                                                            Map&lt;String, String&gt; customProperties,</span></span><br><span class="line"><span class="params">                                                            <span class="type">long</span> delayTime,</span></span><br><span class="line"><span class="params">                                                            TimeUnit unit)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>单分区<code>ConsumerImpl</code> 实现<code>doReconsumeLater</code>抽象方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> CompletableFuture&lt;Void&gt; <span class="title function_">doReconsumeLater</span><span class="params">(Message&lt;?&gt; message, AckType ackType,</span></span><br><span class="line"><span class="params">                                                   Map&lt;String, String&gt; customProperties,</span></span><br><span class="line"><span class="params">                                                   <span class="type">long</span> delayTime,</span></span><br><span class="line"><span class="params">                                                   TimeUnit unit)</span> &#123;</span><br><span class="line">    <span class="type">MessageId</span> <span class="variable">messageId</span> <span class="operator">=</span> message.getMessageId();</span><br><span class="line">    <span class="keyword">if</span> (messageId == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> FutureUtil.failedFuture(<span class="keyword">new</span> <span class="title class_">PulsarClientException</span></span><br><span class="line">                .InvalidMessageException(<span class="string">&quot;Cannot handle message with null messageId&quot;</span>));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 检查消费者的状态</span></span><br><span class="line">    <span class="keyword">if</span> (getState() != State.Ready &amp;&amp; getState() != State.Connecting) &#123;</span><br><span class="line">        stats.incrementNumAcksFailed();</span><br><span class="line">        <span class="type">PulsarClientException</span> <span class="variable">exception</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PulsarClientException</span>(<span class="string">&quot;Consumer not ready. State: &quot;</span> + getState());</span><br><span class="line">        <span class="keyword">if</span> (AckType.Individual.equals(ackType)) &#123;</span><br><span class="line">            onAcknowledge(messageId, exception);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (AckType.Cumulative.equals(ackType)) &#123;</span><br><span class="line">            onAcknowledgeCumulative(messageId, exception);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> FutureUtil.failedFuture(exception);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (delayTime &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        delayTime = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (retryLetterProducer == <span class="literal">null</span>) &#123;</span><br><span class="line">        </span><br><span class="line">        createProducerLock.writeLock().lock();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 如果重试生产者为空 创建重试消息生产者</span></span><br><span class="line">            <span class="keyword">if</span> (retryLetterProducer == <span class="literal">null</span>) &#123;</span><br><span class="line">                retryLetterProducer = client.newProducer(Schema.AUTO_PRODUCE_BYTES(schema))</span><br><span class="line">                        .topic(<span class="built_in">this</span>.deadLetterPolicy.getRetryLetterTopic())</span><br><span class="line">                        .enableBatching(<span class="literal">false</span>)</span><br><span class="line">                        .enableChunking(<span class="literal">true</span>)</span><br><span class="line">                        .blockIfQueueFull(<span class="literal">false</span>)</span><br><span class="line">                        .create();</span><br><span class="line">                stats.setRetryLetterProducerStats(retryLetterProducer.getStats());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            log.error(<span class="string">&quot;Create retry letter producer exception with topic: &#123;&#125;&quot;</span>,</span><br><span class="line">                    deadLetterPolicy.getRetryLetterTopic(), e);</span><br><span class="line">            <span class="keyword">return</span> FutureUtil.failedFuture(e);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            createProducerLock.writeLock().unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    CompletableFuture&lt;Void&gt; result = <span class="keyword">new</span> <span class="title class_">CompletableFuture</span>&lt;&gt;();</span><br><span class="line">    <span class="keyword">if</span> (retryLetterProducer != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 构建重试消息</span></span><br><span class="line">            MessageImpl&lt;T&gt; retryMessage = (MessageImpl&lt;T&gt;) getMessageImpl(message);</span><br><span class="line">            <span class="comment">// 提取消息的原始 messageId</span></span><br><span class="line">            <span class="type">String</span> <span class="variable">originMessageIdStr</span> <span class="operator">=</span> message.getMessageId().toString();</span><br><span class="line">            <span class="comment">// 主题名（originTopicNameStr）</span></span><br><span class="line">            <span class="type">String</span> <span class="variable">originTopicNameStr</span> <span class="operator">=</span> getOriginTopicNameStr(message);</span><br><span class="line">            <span class="comment">// 并将它们作为属性添加到重试消息中。</span></span><br><span class="line">            SortedMap&lt;String, String&gt; propertiesMap =</span><br><span class="line">                    getPropertiesMap(message, originMessageIdStr, originTopicNameStr);</span><br><span class="line">            <span class="keyword">if</span> (customProperties != <span class="literal">null</span>) &#123;</span><br><span class="line">                propertiesMap.putAll(customProperties);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 并将它们作为属性添加到重试消息中。</span></span><br><span class="line">            <span class="type">int</span> <span class="variable">reconsumeTimes</span> <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line">            <span class="comment">// 如果消息已经包含了 RECONSUMETIMES 属性，说明这是重新消费的消息，增加其计数。</span></span><br><span class="line">            <span class="keyword">if</span> (propertiesMap.containsKey(RetryMessageUtil.SYSTEM_PROPERTY_RECONSUMETIMES)) &#123;</span><br><span class="line">                reconsumeTimes = Integer.parseInt(</span><br><span class="line">                        propertiesMap.get(RetryMessageUtil.SYSTEM_PROPERTY_RECONSUMETIMES));</span><br><span class="line">                reconsumeTimes = reconsumeTimes + <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            propertiesMap.put(RetryMessageUtil.SYSTEM_PROPERTY_RECONSUMETIMES, String.valueOf(reconsumeTimes));</span><br><span class="line">            propertiesMap.put(RetryMessageUtil.SYSTEM_PROPERTY_DELAY_TIME,</span><br><span class="line">                    String.valueOf(unit.toMillis(delayTime)));</span><br><span class="line"></span><br><span class="line">            <span class="type">MessageId</span> <span class="variable">finalMessageId</span> <span class="operator">=</span> messageId;</span><br><span class="line">            <span class="keyword">if</span> (reconsumeTimes &gt; <span class="built_in">this</span>.deadLetterPolicy.getMaxRedeliverCount()</span><br><span class="line">                    &amp;&amp; StringUtils.isNotBlank(deadLetterPolicy.getDeadLetterTopic())) &#123;</span><br><span class="line">                <span class="comment">// 超过最大重试次数并发送到死信队列    </span></span><br><span class="line">                initDeadLetterProducerIfNeeded();</span><br><span class="line">                deadLetterProducer.thenAcceptAsync(dlqProducer -&gt; &#123;</span><br><span class="line">                    TypedMessageBuilder&lt;<span class="type">byte</span>[]&gt; typedMessageBuilderNew =</span><br><span class="line">                            dlqProducer.newMessage(Schema.AUTO_PRODUCE_BYTES(retryMessage.getReaderSchema().get()))</span><br><span class="line">                                    .value(retryMessage.getData())</span><br><span class="line">                                    .properties(propertiesMap);</span><br><span class="line">                    typedMessageBuilderNew.sendAsync().thenAccept(msgId -&gt; &#123;</span><br><span class="line">                        consumerDlqMessagesCounter.increment();</span><br><span class="line"></span><br><span class="line">                        doAcknowledge(finalMessageId, ackType, Collections.emptyMap(), <span class="literal">null</span>).thenAccept(v -&gt; &#123;</span><br><span class="line">                            result.complete(<span class="literal">null</span>);</span><br><span class="line">                        &#125;).exceptionally(ex -&gt; &#123;</span><br><span class="line">                            result.completeExceptionally(ex);</span><br><span class="line">                            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">                        &#125;);</span><br><span class="line">                    &#125;).exceptionally(ex -&gt; &#123;</span><br><span class="line">                        result.completeExceptionally(ex);</span><br><span class="line">                        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">                    &#125;);</span><br><span class="line">                &#125;, internalPinnedExecutor).exceptionally(ex -&gt; &#123;</span><br><span class="line">                    result.completeExceptionally(ex);</span><br><span class="line">                    deadLetterProducer = <span class="literal">null</span>;</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// 如果消息的重试次数未达到最大限制，则将消息发送到重试队列</span></span><br><span class="line">                <span class="keyword">assert</span> retryMessage != <span class="literal">null</span>;</span><br><span class="line">                TypedMessageBuilder&lt;<span class="type">byte</span>[]&gt; typedMessageBuilderNew = retryLetterProducer</span><br><span class="line">                        .newMessage(Schema.AUTO_PRODUCE_BYTES(message.getReaderSchema().get()))</span><br><span class="line">                        .value(retryMessage.getData())</span><br><span class="line">                        .properties(propertiesMap);</span><br><span class="line">                <span class="keyword">if</span> (delayTime &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    typedMessageBuilderNew.deliverAfter(delayTime, unit);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (message.hasKey()) &#123;</span><br><span class="line">                    typedMessageBuilderNew.key(message.getKey());</span><br><span class="line">                &#125;</span><br><span class="line">                typedMessageBuilderNew.sendAsync()</span><br><span class="line">                        .thenCompose(__ -&gt; doAcknowledge(finalMessageId, ackType, Collections.emptyMap(), <span class="literal">null</span>))</span><br><span class="line">                        .thenAccept(v -&gt; result.complete(<span class="literal">null</span>))</span><br><span class="line">                        .exceptionally(ex -&gt; &#123;</span><br><span class="line">                            result.completeExceptionally(ex);</span><br><span class="line">                            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">                        &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            result.completeExceptionally(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">MessageId</span> <span class="variable">finalMessageId</span> <span class="operator">=</span> messageId;</span><br><span class="line">    result.exceptionally(ex -&gt; &#123;</span><br><span class="line">        log.error(<span class="string">&quot;Send to retry letter topic exception with topic: &#123;&#125;, messageId: &#123;&#125;&quot;</span>,</span><br><span class="line">                retryLetterProducer.getTopic(), finalMessageId, ex);</span><br><span class="line">        Set&lt;MessageId&gt; messageIds = Collections.singleton(finalMessageId);</span><br><span class="line">        unAckedMessageTracker.remove(finalMessageId);</span><br><span class="line">        redeliverUnacknowledgedMessages(messageIds);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>多分区<code>MultiTopicsConsumerImpl</code>实现<code>doReconsumeLater</code>抽象方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">protected</span> CompletableFuture&lt;Void&gt; <span class="title function_">doReconsumeLater</span><span class="params">(Message&lt;?&gt; message, AckType ackType,</span></span><br><span class="line"><span class="params">                                                   Map&lt;String, String&gt; customProperties,</span></span><br><span class="line"><span class="params">                                                   <span class="type">long</span> delayTime,</span></span><br><span class="line"><span class="params">                                                   TimeUnit unit)</span> &#123;</span><br><span class="line">    <span class="type">MessageId</span> <span class="variable">messageId</span> <span class="operator">=</span> message.getMessageId();</span><br><span class="line">    <span class="keyword">if</span> (messageId == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> FutureUtil.failedFuture(<span class="keyword">new</span> <span class="title class_">PulsarClientException</span></span><br><span class="line">                .InvalidMessageException(<span class="string">&quot;Cannot handle message with null messageId&quot;</span>));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!(messageId <span class="keyword">instanceof</span> TopicMessageId)) &#123;</span><br><span class="line">        <span class="keyword">return</span> FutureUtil.failedFuture(<span class="keyword">new</span> <span class="title class_">PulsarClientException</span>.NotAllowedException(</span><br><span class="line">                <span class="string">&quot;Only TopicMessageId is allowed for reconsumeLater for a multi-topics consumer, while messageId is &quot;</span></span><br><span class="line">                        + message.getClass().getName()));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">TopicMessageId</span> <span class="variable">topicMessageId</span> <span class="operator">=</span> (TopicMessageId) messageId;</span><br><span class="line">    <span class="keyword">if</span> (getState() != State.Ready) &#123;</span><br><span class="line">        <span class="keyword">return</span> FutureUtil.failedFuture(<span class="keyword">new</span> <span class="title class_">PulsarClientException</span>(<span class="string">&quot;Consumer already closed&quot;</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (ackType == AckType.Cumulative) &#123;</span><br><span class="line">        Consumer&lt;T&gt; individualConsumer = consumers.get(topicMessageId.getOwnerTopic());</span><br><span class="line">        <span class="keyword">if</span> (individualConsumer != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> individualConsumer.reconsumeLaterCumulativeAsync(message, delayTime, unit);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> FutureUtil.failedFuture(<span class="keyword">new</span> <span class="title class_">PulsarClientException</span>.NotConnectedException());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 实际也是调用单分区的doReconsumeLater方法</span></span><br><span class="line">        ConsumerImpl&lt;T&gt; consumer = consumers.get(topicMessageId.getOwnerTopic());</span><br><span class="line">        <span class="keyword">return</span> consumer.doReconsumeLater(message, ackType, customProperties, delayTime, unit)</span><br><span class="line">                 .thenRun(() -&gt;unAckedMessageTracker.remove(topicMessageId));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="否定确认"><a href="#否定确认" class="headerlink" title="否定确认"></a>否定确认</h1><pre><code>否定确认机制允许您向Broker发送通知，指出消费者没有处理消息。当消费者未能消费消息并需要重新消费它时，消费者向Broker发送否定确认（nack），触发Broker将此消息重新传递给消费者。
+
+在Exclusive和Exclusive订阅类型中，消费者只对他们收到的最后一条消息进行否定确认。
+
+在Shared和Key_Shared订阅类型中，消费者可以分别否定确认消息。
+
+如果要对消息使用否定确认，请确保在确认超时之前进行否定确认
+</code></pre>
+<h2 id="使用方式-1"><a href="#使用方式-1" class="headerlink" title="使用方式"></a>使用方式</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">Consumer&lt;<span class="type">byte</span>[]&gt; consumer = pulsarClient.newConsumer()</span><br><span class="line">        .topic(topic)</span><br><span class="line">        .subscriptionName(<span class="string">&quot;sub-negative-ack&quot;</span>)</span><br><span class="line">        .subscriptionInitialPosition(SubscriptionInitialPosition.Earliest)</span><br><span class="line">        <span class="comment">// 以不同的延迟来</span></span><br><span class="line">        .negativeAckRedeliveryBackoff(MultiplierRedeliveryBackoff.builder()</span><br><span class="line">            .minDelayMs(<span class="number">1000</span>)</span><br><span class="line">            .maxDelayMs(<span class="number">60</span> * <span class="number">1000</span>)</span><br><span class="line">            .multiplier(<span class="number">2</span>)</span><br><span class="line">            .build())</span><br><span class="line">        .subscribe();</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    Message&lt;String&gt; msg = consumer.receive();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">         <span class="comment">// Process message...</span></span><br><span class="line">         consumer.acknowledge(msg);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">         log.warn(<span class="string">&quot;Failed to process message&quot;</span>);</span><br><span class="line">         consumer.negativeAcknowledge(msg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="具体实现-1"><a href="#具体实现-1" class="headerlink" title="具体实现"></a>具体实现</h2><p><code>Consumer</code>接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">negativeAcknowledge</span><span class="params">(Message&lt;?&gt; message)</span>;</span><br></pre></td></tr></table></figure>
+
+<p><code>ConsumerImpl</code>实现</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">negativeAcknowledge</span><span class="params">(MessageId messageId)</span> &#123;</span><br><span class="line">    consumerNacksCounter.increment();</span><br><span class="line">    <span class="comment">// 添加到否定确认跟踪器中</span></span><br><span class="line">    negativeAcksTracker.add(messageId);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Ensure the message is not redelivered for ack-timeout, since we did receive an &quot;ack&quot;</span></span><br><span class="line">    unAckedMessageTracker.remove(messageId);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>NegativeAcksTracker</code>主要实现</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">NegativeAcksTracker</span> <span class="keyword">implements</span> <span class="title class_">Closeable</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> LoggerFactory.getLogger(NegativeAcksTracker.class);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> HashMap&lt;MessageId, Long&gt; nackedMessages = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ConsumerBase&lt;?&gt; consumer;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Timer timer;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">long</span> nackDelayNanos;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">long</span> timerIntervalNanos;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> RedeliveryBackoff negativeAckRedeliveryBackoff;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Timeout timeout;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Set a min delay to allow for grouping nacks within a single batch</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">MIN_NACK_DELAY_NANOS</span> <span class="operator">=</span> TimeUnit.MILLISECONDS.toNanos(<span class="number">100</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">NegativeAcksTracker</span><span class="params">(ConsumerBase&lt;?&gt; consumer, ConsumerConfigurationData&lt;?&gt; conf)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.consumer = consumer;</span><br><span class="line">        <span class="built_in">this</span>.timer = consumer.getClient().timer();</span><br><span class="line">        <span class="built_in">this</span>.nackDelayNanos = Math.max(TimeUnit.MICROSECONDS.toNanos(conf.getNegativeAckRedeliveryDelayMicros()),</span><br><span class="line">                MIN_NACK_DELAY_NANOS);</span><br><span class="line">        <span class="built_in">this</span>.negativeAckRedeliveryBackoff = conf.getNegativeAckRedeliveryBackoff();</span><br><span class="line">        <span class="keyword">if</span> (negativeAckRedeliveryBackoff != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="built_in">this</span>.timerIntervalNanos = Math.max(</span><br><span class="line">                    TimeUnit.MILLISECONDS.toNanos(negativeAckRedeliveryBackoff.next(<span class="number">0</span>)),</span><br><span class="line">                    MIN_NACK_DELAY_NANOS) / <span class="number">3</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.timerIntervalNanos = nackDelayNanos / <span class="number">3</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">triggerRedelivery</span><span class="params">(Timeout t)</span> &#123;</span><br><span class="line">        <span class="comment">// 检查是否有消息需要重新投递。如果没有，设置timeout为null并退出</span></span><br><span class="line">        <span class="keyword">if</span> (nackedMessages.isEmpty()) &#123;</span><br><span class="line">            <span class="built_in">this</span>.timeout = <span class="literal">null</span>;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Group all the nacked messages into one single re-delivery request</span></span><br><span class="line">        Set&lt;MessageId&gt; messagesToRedeliver = <span class="keyword">new</span> <span class="title class_">HashSet</span>&lt;&gt;();</span><br><span class="line">        <span class="type">long</span> <span class="variable">now</span> <span class="operator">=</span> System.nanoTime();</span><br><span class="line">        nackedMessages.forEach((msgId, timestamp) -&gt; &#123;</span><br><span class="line">            <span class="comment">// 检查每条消息的时间戳是否已到。如果已到，将其添加到messagesToRedeliver集合中</span></span><br><span class="line">            <span class="keyword">if</span> (timestamp &lt; now) &#123;</span><br><span class="line">                addChunkedMessageIdsAndRemoveFromSequenceMap(msgId, messagesToRedeliver, <span class="built_in">this</span>.consumer);</span><br><span class="line">                messagesToRedeliver.add(msgId);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 移除并调用consumer.onNegativeAcksSend(messagesToRedeliver)和consumer.redeliverUnacknowledgedMessages(messagesToRedeliver)来处理重发</span></span><br><span class="line">        <span class="keyword">if</span> (!messagesToRedeliver.isEmpty()) &#123;</span><br><span class="line">            </span><br><span class="line">            messagesToRedeliver.forEach(nackedMessages::remove);</span><br><span class="line">            consumer.onNegativeAcksSend(messagesToRedeliver);</span><br><span class="line">            log.info(<span class="string">&quot;[&#123;&#125;] &#123;&#125; messages will be re-delivered&quot;</span>, consumer, messagesToRedeliver.size());</span><br><span class="line">            <span class="comment">// 调用重新投递方法</span></span><br><span class="line">            consumer.redeliverUnacknowledgedMessages(messagesToRedeliver);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">this</span>.timeout = timer.newTimeout(<span class="built_in">this</span>::triggerRedelivery, timerIntervalNanos, TimeUnit.NANOSECONDS);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">add</span><span class="params">(MessageId messageId, <span class="type">int</span> redeliveryCount)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (nackedMessages == <span class="literal">null</span>) &#123;</span><br><span class="line">            nackedMessages = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">long</span> backoffNs;</span><br><span class="line">        <span class="keyword">if</span> (negativeAckRedeliveryBackoff != <span class="literal">null</span>) &#123;</span><br><span class="line">            backoffNs = TimeUnit.MILLISECONDS.toNanos(negativeAckRedeliveryBackoff.next(redeliveryCount));</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            backoffNs = nackDelayNanos;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 将消息添加到否定确认消息map中，并设置超时时间戳</span></span><br><span class="line">        nackedMessages.put(MessageIdAdvUtils.discardBatch(messageId), System.nanoTime() + backoffNs);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">this</span>.timeout == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="comment">// Schedule a task and group all the redeliveries for same period. Leave a small buffer to allow for</span></span><br><span class="line">            <span class="comment">// nack immediately following the current one will be batched into the same redeliver request.</span></span><br><span class="line">            <span class="comment">// 定时任务触发重新投递</span></span><br><span class="line">            <span class="built_in">this</span>.timeout = timer.newTimeout(<span class="built_in">this</span>::triggerRedelivery, timerIntervalNanos, TimeUnit.NANOSECONDS);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="未确认消息跟踪器"><a href="#未确认消息跟踪器" class="headerlink" title="未确认消息跟踪器"></a>未确认消息跟踪器</h1><h2 id="使用方式-2"><a href="#使用方式-2" class="headerlink" title="使用方式"></a>使用方式</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Consumer&lt;<span class="type">byte</span>[]&gt; consumer = pulsarClient.newConsumer() <span class="comment">//</span></span><br><span class="line">        .topic(<span class="string">&quot;persistent://my-tenant/my-ns/my-topic&quot;</span>) <span class="comment">//</span></span><br><span class="line">        .ackTimeout(<span class="number">5</span>, TimeUnit.SECONDS)</span><br><span class="line">        .ackTimeoutRedeliveryBackoff(MultiplierRedeliveryBackoff.builder()</span><br><span class="line">                .minDelayMs(<span class="number">1000</span>)</span><br><span class="line">                .maxDelayMs(<span class="number">60000</span>)</span><br><span class="line">                .multiplier(<span class="number">2</span>)</span><br><span class="line">                .build())</span><br><span class="line">        .subscriptionName(<span class="string">&quot;my-subscription-name&quot;</span>).subscribe();</span><br></pre></td></tr></table></figure>
+<p>以上的<code>ackTimeoutRedeliveryBackoff</code>配置，消息重新传递行为应如下所示</p>
+<table>
+<thead>
+<tr>
+<th>重新投递次数</th>
+<th>重新投递延迟</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>1 seconds</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2 seconds</td>
+</tr>
+<tr>
+<td>3</td>
+<td>4 seconds</td>
+</tr>
+<tr>
+<td>4</td>
+<td>8 seconds</td>
+</tr>
+<tr>
+<td>5</td>
+<td>16 seconds</td>
+</tr>
+<tr>
+<td>6</td>
+<td>32 seconds</td>
+</tr>
+<tr>
+<td>7</td>
+<td>60 seconds</td>
+</tr>
+<tr>
+<td>8</td>
+<td>60 seconds</td>
+</tr>
+</tbody></table>
+<p>每当客户端接收到消息时<br>ConsumerImpl.messageReceived() -&gt; executeNotifyCallback() -&gt; messageProcessed() -&gt; trackMessage() -&gt; trackUnAckedMsgIfNoListener() 将消息加入未确认消息跟踪器中</p>
+<p>在<code>ConsumerBase</code>中初始化<code>unAckedMessageTracker</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (conf.getAckTimeoutMillis() != <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (conf.getAckTimeoutRedeliveryBackoff() != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="built_in">this</span>.unAckedMessageTracker = <span class="keyword">new</span> <span class="title class_">UnAckedTopicMessageRedeliveryTracker</span>(client, <span class="built_in">this</span>, conf);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.unAckedMessageTracker = <span class="keyword">new</span> <span class="title class_">UnAckedTopicMessageTracker</span>(client, <span class="built_in">this</span>, conf);</span><br><span class="line">    &#125;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="built_in">this</span>.unAckedMessageTracker = UnAckedMessageTracker.UNACKED_MESSAGE_TRACKER_DISABLED;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<h2 id="具体实现-2"><a href="#具体实现-2" class="headerlink" title="具体实现"></a>具体实现</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UnAckedMessageTracker</span> <span class="keyword">implements</span> <span class="title class_">Closeable</span> &#123;</span><br><span class="line">    <span class="comment">// UnAckedMessageTracker 的属性</span></span><br><span class="line">    <span class="comment">// 消息ID-消息集（为了更好的针对消息ID索引）</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">final</span> HashMap&lt;MessageId, HashSet&lt;MessageId&gt;&gt; messageIdPartitionMap;</span><br><span class="line">    <span class="comment">// 双向列表 用于时间分区</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">final</span> ArrayDeque&lt;HashSet&lt;MessageId&gt;&gt; timePartitions;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 读写锁</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">final</span> Lock readLock;</span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">final</span> Lock writeLock;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// UnAckedMessageTracker 的空实现，用于非持久化消息组件</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">UnAckedMessageTrackerDisabled</span> <span class="variable">UNACKED_MESSAGE_TRACKER_DISABLED</span> <span class="operator">=</span></span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">UnAckedMessageTrackerDisabled</span>();</span><br><span class="line">    <span class="comment">// 确认超时时间</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">final</span> <span class="type">long</span> ackTimeoutMillis;</span><br><span class="line">    <span class="comment">// 定时器的触发间隔</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">final</span> <span class="type">long</span> tickDurationInMs;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 消费者ack超时计数器</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Counter consumerAckTimeoutsCounter;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">protected</span> Timeout timeout;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">UnAckedMessageTracker</span><span class="params">(PulsarClientImpl client, ConsumerBase&lt;?&gt; consumerBase,</span></span><br><span class="line"><span class="params">                                ConsumerConfigurationData&lt;?&gt; conf)</span> &#123;</span><br><span class="line">        <span class="comment">// 超时时间                         </span></span><br><span class="line">        <span class="built_in">this</span>.ackTimeoutMillis = conf.getAckTimeoutMillis();</span><br><span class="line">        <span class="comment">// 定时器的间隔时间</span></span><br><span class="line">        <span class="built_in">this</span>.tickDurationInMs = Math.min(conf.getTickDurationMillis(), conf.getAckTimeoutMillis());</span><br><span class="line">        <span class="comment">// 定时器的触发间隔必须大于0，并且确认超时时间大于等于单位时间</span></span><br><span class="line">        checkArgument(tickDurationInMs &gt; <span class="number">0</span> &amp;&amp; ackTimeoutMillis &gt;= tickDurationInMs);</span><br><span class="line">        <span class="type">ReentrantReadWriteLock</span> <span class="variable">readWriteLock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReentrantReadWriteLock</span>();</span><br><span class="line">        <span class="built_in">this</span>.readLock = readWriteLock.readLock();</span><br><span class="line">        <span class="built_in">this</span>.writeLock = readWriteLock.writeLock();</span><br><span class="line"></span><br><span class="line">        <span class="type">InstrumentProvider</span> <span class="variable">ip</span> <span class="operator">=</span> client.instrumentProvider();</span><br><span class="line">        consumerAckTimeoutsCounter = ip.newCounter(<span class="string">&quot;pulsar.client.consumer.message.ack.timeout&quot;</span>, Unit.Messages,</span><br><span class="line">                <span class="string">&quot;The number of messages that were not acknowledged in the configured timeout period, hence, were &quot;</span></span><br><span class="line">                        + <span class="string">&quot;requested by the client to be redelivered&quot;</span>,</span><br><span class="line">                consumerBase.getTopic(),</span><br><span class="line">                Attributes.builder().put(<span class="string">&quot;pulsar.subscription&quot;</span>, consumerBase.getSubscription()).build());</span><br><span class="line">        <span class="comment">// 如果不为空则初始化为UnAckedTopicMessageRedeliveryTracker</span></span><br><span class="line">        <span class="keyword">if</span> (conf.getAckTimeoutRedeliveryBackoff() == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="comment">// 这里主要用于存储消息ID和消息的映射</span></span><br><span class="line">            <span class="built_in">this</span>.messageIdPartitionMap = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">            <span class="comment">// 从头部移除，尾部追加数据</span></span><br><span class="line">            <span class="built_in">this</span>.timePartitions = <span class="keyword">new</span> <span class="title class_">ArrayDeque</span>&lt;&gt;();</span><br><span class="line">            <span class="comment">// 设置一个时间分区，假设确认超时时间为11000ms，单位时间为2000ms，此时计算结果为5</span></span><br><span class="line">            <span class="type">int</span> <span class="variable">blankPartitions</span> <span class="operator">=</span> (<span class="type">int</span>) Math.ceil((<span class="type">double</span>) <span class="built_in">this</span>.ackTimeoutMillis / <span class="built_in">this</span>.tickDurationInMs);</span><br><span class="line">            <span class="comment">// 创建6个时间分区容器</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; blankPartitions + <span class="number">1</span>; i++) &#123;</span><br><span class="line">                timePartitions.add(<span class="keyword">new</span> <span class="title class_">HashSet</span>&lt;&gt;(<span class="number">16</span>, <span class="number">1</span>));</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 新增一个定时器任务，tickDurationInMs 为轮询间隔</span></span><br><span class="line">            <span class="comment">// 也就是这里会处理消息消费超时，并通知broker进行重新投递</span></span><br><span class="line">            timeout = client.timer().newTimeout(<span class="keyword">new</span> <span class="title class_">TimerTask</span>() &#123;</span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">(Timeout t)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">                    <span class="keyword">if</span> (t.isCancelled()) &#123;</span><br><span class="line">                        <span class="keyword">return</span>;</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                    Set&lt;MessageId&gt; messageIds = TL_MESSAGE_IDS_SET.get();</span><br><span class="line">                    messageIds.clear();</span><br><span class="line"></span><br><span class="line">                    writeLock.lock();</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        <span class="comment">// 取出并移除队列头部的分区</span></span><br><span class="line">                        HashSet&lt;MessageId&gt; headPartition = timePartitions.removeFirst();</span><br><span class="line">                        <span class="comment">// 如果头部分区不为空</span></span><br><span class="line">                        <span class="keyword">if</span> (!headPartition.isEmpty()) &#123;</span><br><span class="line">                            consumerAckTimeoutsCounter.add(headPartition.size());</span><br><span class="line">                            log.info(<span class="string">&quot;[&#123;&#125;] &#123;&#125; messages will be re-delivered&quot;</span>, consumerBase, headPartition.size());</span><br><span class="line">                            headPartition.forEach(messageId -&gt; &#123;</span><br><span class="line">                                <span class="comment">// 分片消息</span></span><br><span class="line">                                <span class="keyword">if</span> (messageId <span class="keyword">instanceof</span> ChunkMessageIdImpl) &#123;</span><br><span class="line">                                    addChunkedMessageIdsAndRemoveFromSequenceMap(messageId, messageIds, consumerBase);</span><br><span class="line">                                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                                    messageIds.add(messageId);</span><br><span class="line">                                &#125;</span><br><span class="line">                                <span class="comment">// 从消息id-分区map中删除</span></span><br><span class="line">                                messageIdPartitionMap.remove(messageId);</span><br><span class="line">                            &#125;);</span><br><span class="line">                        &#125;</span><br><span class="line">                        </span><br><span class="line">                        <span class="comment">// 清空头部分区</span></span><br><span class="line">                        headPartition.clear();</span><br><span class="line">                        <span class="comment">// 加入队列的尾部</span></span><br><span class="line">                        timePartitions.addLast(headPartition);</span><br><span class="line">                    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">                            timeout = client.timer().newTimeout(<span class="built_in">this</span>, tickDurationInMs, TimeUnit.MILLISECONDS);</span><br><span class="line">                        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                            writeLock.unlock();</span><br><span class="line"></span><br><span class="line">                            <span class="keyword">if</span> (!messageIds.isEmpty()) &#123;</span><br><span class="line">                                consumerBase.onAckTimeoutSend(messageIds);</span><br><span class="line">                                consumerBase.redeliverUnacknowledgedMessages(messageIds);</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;, <span class="built_in">this</span>.tickDurationInMs, TimeUnit.MILLISECONDS);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.messageIdPartitionMap = <span class="literal">null</span>;</span><br><span class="line">            <span class="built_in">this</span>.timePartitions = <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*添加逻辑分析</span></span><br><span class="line"><span class="comment">    为什么加入尾部分区？</span></span><br><span class="line"><span class="comment">    最近添加的消息：未确认的消息是按照它们的添加时间进行管理的。最近添加的消息应该被放置在队列的尾部分区中，因为这些消息离超时的阈值还很远，不需要马上进行超时检查。</span></span><br><span class="line"><span class="comment">    超时检查顺序：定时器会从头部分区开始检查未确认消息。如果新的消息被加入到尾部分区，就可以保证这些消息在未来的检查周期内才会被考虑超时，而不是立即被处理。</span></span><br><span class="line"><span class="comment">    添加的具体操作</span></span><br><span class="line"><span class="comment">    在 add(MessageId messageId) 方法中：</span></span><br><span class="line"><span class="comment">    使用 timePartitions.peekLast() 获取 ArrayDeque 中的尾部分区。</span></span><br><span class="line"><span class="comment">    将新的 MessageId 加入这个尾部分区中。</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">add</span><span class="params">(MessageId messageId)</span> &#123;</span><br><span class="line">        writeLock.lock();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 取出队列尾部的集合</span></span><br><span class="line">            HashSet&lt;MessageId&gt; partition = timePartitions.peekLast();</span><br><span class="line">            <span class="comment">// 如果原map不存在映射则将消息id-分区的映射放入messageIdPartitionMap</span></span><br><span class="line">            HashSet&lt;MessageId&gt; previousPartition = messageIdPartitionMap.putIfAbsent(messageId, partition);</span><br><span class="line">            <span class="keyword">if</span> (previousPartition == <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="comment">// 之前不存在映射，则将消息id放入队尾分区的集合中</span></span><br><span class="line">                <span class="keyword">return</span> partition.add(messageId);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// 之前存在映射，不做处理</span></span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            writeLock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>UnAckedMessageRedeliveryTracker</code>实现</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UnAckedMessageRedeliveryTracker</span> <span class="keyword">extends</span> <span class="title class_">UnAckedMessageTracker</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> LoggerFactory.getLogger(UnAckedMessageRedeliveryTracker.class);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">final</span> HashMap&lt;UnackMessageIdWrapper, HashSet&lt;UnackMessageIdWrapper&gt;&gt; redeliveryMessageIdPartitionMap;</span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">final</span> ArrayDeque&lt;HashSet&lt;UnackMessageIdWrapper&gt;&gt; redeliveryTimePartitions;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">final</span> HashMap&lt;MessageId, Long&gt; ackTimeoutMessages;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> RedeliveryBackoff ackTimeoutRedeliveryBackoff;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">UnAckedMessageRedeliveryTracker</span><span class="params">(PulsarClientImpl client, ConsumerBase&lt;?&gt; consumerBase,</span></span><br><span class="line"><span class="params">                                           ConsumerConfigurationData&lt;?&gt; conf)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>(client, consumerBase, conf);</span><br><span class="line">        <span class="built_in">this</span>.ackTimeoutRedeliveryBackoff = conf.getAckTimeoutRedeliveryBackoff();</span><br><span class="line">        <span class="built_in">this</span>.ackTimeoutMessages = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;MessageId, Long&gt;();</span><br><span class="line">        <span class="built_in">this</span>.redeliveryMessageIdPartitionMap = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        <span class="built_in">this</span>.redeliveryTimePartitions = <span class="keyword">new</span> <span class="title class_">ArrayDeque</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> <span class="variable">blankPartitions</span> <span class="operator">=</span> (<span class="type">int</span>) Math.ceil((<span class="type">double</span>) <span class="built_in">this</span>.ackTimeoutMillis / <span class="built_in">this</span>.tickDurationInMs);</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; blankPartitions + <span class="number">1</span>; i++) &#123;</span><br><span class="line">            redeliveryTimePartitions.add(<span class="keyword">new</span> <span class="title class_">HashSet</span>&lt;&gt;(<span class="number">16</span>, <span class="number">1</span>));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        timeout = client.timer().newTimeout(<span class="keyword">new</span> <span class="title class_">TimerTask</span>() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">(Timeout t)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">                writeLock.lock();</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    HashSet&lt;UnackMessageIdWrapper&gt; headPartition = redeliveryTimePartitions.removeFirst();</span><br><span class="line">                    <span class="keyword">if</span> (!headPartition.isEmpty()) &#123;</span><br><span class="line">                        headPartition.forEach(unackMessageIdWrapper -&gt; &#123;</span><br><span class="line">                            addAckTimeoutMessages(unackMessageIdWrapper);</span><br><span class="line">                            redeliveryMessageIdPartitionMap.remove(unackMessageIdWrapper);</span><br><span class="line">                            unackMessageIdWrapper.recycle();</span><br><span class="line">                        &#125;);</span><br><span class="line">                    &#125;</span><br><span class="line">                    headPartition.clear();</span><br><span class="line">                    redeliveryTimePartitions.addLast(headPartition);</span><br><span class="line">                    triggerRedelivery(consumerBase);</span><br><span class="line">                &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                    writeLock.unlock();</span><br><span class="line">                    timeout = client.timer().newTimeout(<span class="built_in">this</span>, tickDurationInMs, TimeUnit.MILLISECONDS);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, <span class="built_in">this</span>.tickDurationInMs, TimeUnit.MILLISECONDS);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 添加超时消息</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">addAckTimeoutMessages</span><span class="params">(UnackMessageIdWrapper messageIdWrapper)</span> &#123;</span><br><span class="line">        writeLock.lock();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">MessageId</span> <span class="variable">messageId</span> <span class="operator">=</span> messageIdWrapper.getMessageId();</span><br><span class="line">            <span class="type">int</span> <span class="variable">redeliveryCount</span> <span class="operator">=</span> messageIdWrapper.getRedeliveryCount();</span><br><span class="line">            <span class="comment">// 计算下次超时时间</span></span><br><span class="line">            <span class="type">long</span> <span class="variable">backoffNs</span> <span class="operator">=</span> ackTimeoutRedeliveryBackoff.next(redeliveryCount);</span><br><span class="line">            <span class="comment">// 消息id：超时时间的映射</span></span><br><span class="line">            ackTimeoutMessages.put(messageId, System.currentTimeMillis() + backoffNs);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            writeLock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">triggerRedelivery</span><span class="params">(ConsumerBase&lt;?&gt; consumerBase)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (ackTimeoutMessages.isEmpty()) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        Set&lt;MessageId&gt; messageIds = TL_MESSAGE_IDS_SET.get();</span><br><span class="line">        messageIds.clear();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">long</span> <span class="variable">now</span> <span class="operator">=</span> System.currentTimeMillis();</span><br><span class="line">            ackTimeoutMessages.forEach((messageId, timestamp) -&gt; &#123;</span><br><span class="line">                <span class="comment">// 时间戳小于等于当前时间则加入重投递消息集合中</span></span><br><span class="line">                <span class="keyword">if</span> (timestamp &lt;= now) &#123;</span><br><span class="line">                    addChunkedMessageIdsAndRemoveFromSequenceMap(messageId, messageIds, consumerBase);</span><br><span class="line">                    messageIds.add(messageId);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">            <span class="keyword">if</span> (!messageIds.isEmpty()) &#123;</span><br><span class="line">                log.info(<span class="string">&quot;[&#123;&#125;] &#123;&#125; messages will be re-delivered&quot;</span>, consumerBase, messageIds.size());</span><br><span class="line">                Iterator&lt;MessageId&gt; iterator = messageIds.iterator();</span><br><span class="line">                <span class="keyword">while</span> (iterator.hasNext()) &#123;</span><br><span class="line">                    <span class="type">MessageId</span> <span class="variable">messageId</span> <span class="operator">=</span> iterator.next();</span><br><span class="line">                    ackTimeoutMessages.remove(messageId);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (messageIds.size() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                consumerBase.onAckTimeoutSend(messageIds);</span><br><span class="line">                <span class="comment">// 触发重投递</span></span><br><span class="line">                consumerBase.redeliverUnacknowledgedMessages(messageIds);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">add</span><span class="params">(MessageId messageId, <span class="type">int</span> redeliveryCount)</span> &#123;</span><br><span class="line">        writeLock.lock();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">UnackMessageIdWrapper</span> <span class="variable">messageIdWrapper</span> <span class="operator">=</span> UnackMessageIdWrapper.valueOf(messageId, redeliveryCount);</span><br><span class="line">            HashSet&lt;UnackMessageIdWrapper&gt; partition = redeliveryTimePartitions.peekLast();</span><br><span class="line">            HashSet&lt;UnackMessageIdWrapper&gt; previousPartition = redeliveryMessageIdPartitionMap</span><br><span class="line">                    .putIfAbsent(messageIdWrapper, partition);</span><br><span class="line">            <span class="keyword">if</span> (previousPartition == <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> partition.add(messageIdWrapper);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                messageIdWrapper.recycle();</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            writeLock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      </div>
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
+            
+              <a href="/2024/10/30/pulsar/%E6%B6%88%E8%B4%B9%E8%80%85%E6%8E%A5%E6%94%B6%E6%B6%88%E6%81%AF/" target="_self">
+                <i class="iconfont icon-chevronleft"></i>
+                <span>Prev</span>
+              </a>
+            
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="Update time"></i>
+              2024-11-13 11:22:42
+            </span>
+            
+                  <span class="post-tags">
+                    <i class="iconfont icon-tags mr-10" title="Tags"></i>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/pulsar/" title="pulsar">
+                        #pulsar
+                      </a>
+                    </span>
+                    
+                  </span>
+              
+          </div>
+          <div class="post-foot-prev">
+            
+          </div>
+        </div>
+      
+    </div>
+    
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">Contents</div>
+    <div class="catalog-content">
+      
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%BB%E5%8A%A8%E9%87%8D%E8%AF%95"><span class="toc-text">主动重试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="toc-text">使用方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="toc-text">具体实现</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%90%A6%E5%AE%9A%E7%A1%AE%E8%AE%A4"><span class="toc-text">否定确认</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F-1"><span class="toc-text">使用方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0-1"><span class="toc-text">具体实现</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%AA%E7%A1%AE%E8%AE%A4%E6%B6%88%E6%81%AF%E8%B7%9F%E8%B8%AA%E5%99%A8"><span class="toc-text">未确认消息跟踪器</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F-2"><span class="toc-text">使用方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0-2"><span class="toc-text">具体实现</span></a></li></ol></li></ol>
+      
+    </div>
+  </div>
+
+  
+<script src="/js/catalog.js"></script>
+
+
+
+
+    
+      <div class="comments-container">
+        
+
+
+
+
+
+
+
+      </div>
+    
+  </div>
+
+
+        
+<div class="footer">
+  <div class="social">
+    <ul>
+      
+        <li>
+          
+              <a title="github" target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">
+                <i class="iconfont icon-github"></i>
+              </a>
+              
+        </li>
+        
+    </ul>
+  </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">Copyright © 2024 Oranges</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">Theme by Oranges | Powered by Hexo</a>
+        
+    </div>
+  
+  
+</div>
+
+      </div>
+
+      <div class="tools-bar">
+        <div class="back-to-top tools-bar-item hidden">
+  <a href="javascript: void(0)">
+    <i class="iconfont icon-chevronup"></i>
+  </a>
+</div>
+
+
+<script src="/js/backtotop.js"></script>
+
+
+
+        
+  <div class="search-icon tools-bar-item" id="search-icon">
+    <a href="javascript: void(0)">
+      <i class="iconfont icon-search"></i>
+    </a>
+  </div>
+
+  <div class="search-overlay hidden">
+    <div class="search-content" tabindex="0">
+      <div class="search-title">
+        <span class="search-icon-input">
+          <a href="javascript: void(0)">
+            <i class="iconfont icon-search"></i>
+          </a>
+        </span>
+        
+          <input type="text" class="search-input" id="search-input" placeholder="Search...">
+        
+        <span class="search-close-icon" id="search-close-icon">
+          <a href="javascript: void(0)">
+            <i class="iconfont icon-close"></i>
+          </a>
+        </span>
+      </div>
+      <div class="search-result" id="search-result"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var inputArea = document.querySelector("#search-input")
+    var searchOverlayArea = document.querySelector(".search-overlay")
+
+    inputArea.onclick = function() {
+      getSearchFile()
+      this.onclick = null
+    }
+
+    inputArea.onkeydown = function() {
+      if(event.keyCode == 13)
+        return false
+    }
+
+    function openOrHideSearchContent() {
+      let isHidden = searchOverlayArea.classList.contains('hidden')
+      if (isHidden) {
+        searchOverlayArea.classList.remove('hidden')
+        document.body.classList.add('hidden')
+        // inputArea.focus()
+      } else {
+        searchOverlayArea.classList.add('hidden')
+        document.body.classList.remove('hidden')
+      }
+    }
+
+    function blurSearchContent(e) {
+      if (e.target === searchOverlayArea) {
+        openOrHideSearchContent()
+      }
+    }
+
+    document.querySelector("#search-icon").addEventListener("click", openOrHideSearchContent, false)
+    document.querySelector("#search-close-icon").addEventListener("click", openOrHideSearchContent, false)
+    searchOverlayArea.addEventListener("click", blurSearchContent, false)
+
+    var searchFunc = function (path, search_id, content_id) {
+      'use strict';
+      var $input = document.getElementById(search_id);
+      var $resultContent = document.getElementById(content_id);
+      $resultContent.innerHTML = "<ul><span class='local-search-empty'>First search, index file loading, please wait...<span></ul>";
+      $.ajax({
+        // 0x01. load xml file
+        url: path,
+        dataType: "xml",
+        success: function (xmlResponse) {
+          // 0x02. parse xml file
+          var datas = $("entry", xmlResponse).map(function () {
+            return {
+              title: $("title", this).text(),
+              content: $("content", this).text(),
+              url: $("url", this).text()
+            };
+          }).get();
+          $resultContent.innerHTML = "";
+
+          $input.addEventListener('input', function () {
+            // 0x03. parse query to keywords list
+            var str = '<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length <= 0) {
+              return;
+            }
+            // 0x04. perform local searching
+            datas.forEach(function (data) {
+              var isMatch = true;
+              var content_index = [];
+              if (!data.title || data.title.trim() === '') {
+                data.title = "Untitled";
+              }
+              var orig_data_title = data.title.trim();
+              var data_title = orig_data_title.toLowerCase();
+              var orig_data_content = data.content.trim().replace(/<[^>]+>/g, "");
+              var data_content = orig_data_content.toLowerCase();
+              var data_url = data.url;
+              var index_title = -1;
+              var index_content = -1;
+              var first_occur = -1;
+              // only match artiles with not empty contents
+              if (data_content !== '') {
+                keywords.forEach(function (keyword, i) {
+                  index_title = data_title.indexOf(keyword);
+                  index_content = data_content.indexOf(keyword);
+
+                  if (index_title < 0 && index_content < 0) {
+                    isMatch = false;
+                  } else {
+                    if (index_content < 0) {
+                      index_content = 0;
+                    }
+                    if (i == 0) {
+                      first_occur = index_content;
+                    }
+                    // content_index.push({index_content:index_content, keyword_len:keyword_len});
+                  }
+                });
+              } else {
+                isMatch = false;
+              }
+              // 0x05. show search results
+              if (isMatch) {
+                str += "<li><a href='" + data_url + "' class='search-result-title'>" + orig_data_title + "</a>";
+                var content = orig_data_content;
+                if (first_occur >= 0) {
+                  // cut out 100 characters
+                  var start = first_occur - 20;
+                  var end = first_occur + 80;
+
+                  if (start < 0) {
+                    start = 0;
+                  }
+
+                  if (start == 0) {
+                    end = 100;
+                  }
+
+                  if (end > content.length) {
+                    end = content.length;
+                  }
+
+                  var match_content = content.substr(start, end);
+
+                  // highlight all keywords
+                  keywords.forEach(function (keyword) {
+                    var regS = new RegExp(keyword, "gi");
+                    match_content = match_content.replace(regS, "<span class=\"search-keyword\">" + keyword + "</span>");
+                  });
+
+                  str += "<p class=\"search-result-abstract\">" + match_content + "...</p>"
+                }
+                str += "</li>";
+              }
+            });
+            str += "</ul>";
+            if (str.indexOf('<li>') === -1) {
+              return $resultContent.innerHTML = "<ul><span class='local-search-empty'>No result<span></ul>";
+            }
+            $resultContent.innerHTML = str;
+          });
+        },
+        error: function(xhr, status, error) {
+          $resultContent.innerHTML = ""
+          if (xhr.status === 404) {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>The search.xml file was not found, please refer to：<a href='https://github.com/zchengsite/hexo-theme-oranges#configuration' target='_black'>configuration</a><span></ul>";
+          } else {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>The request failed, Try to refresh the page or try again later.<span></ul>";
+          }
+        }
+      });
+      $(document).on('click', '#search-close-icon', function() {
+        $('#search-input').val('');
+        $('#search-result').html('');
+      });
+    }
+
+    var getSearchFile = function() {
+        var path = "/search.xml";
+        searchFunc(path, 'search-input', 'search-result');
+    }
+  </script>
+
+
+
+
+        
+  <div class="tools-bar-item theme-icon" id="switch-color-scheme">
+    <a href="javascript: void(0)">
+      <i id="theme-icon" class="iconfont icon-moon"></i>
+    </a>
+  </div>
+
+  
+<script src="/js/colorscheme.js"></script>
+
+
+
+
+
+        
+  
+    <div class="share-icon tools-bar-item">
+      <a href="javascript: void(0)" id="share-icon">
+        <i class="iconfont iconshare"></i>
+      </a>
+      <div class="share-content hidden">
+        
+          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + %E6%B6%88%E6%81%AF%E9%87%8D%E8%AF%95%E7%9A%84%E4%B8%89%E7%A7%8D%E6%96%B9%E5%BC%8F%E8%A7%A3%E6%9E%90 + '&url=' + https%3A%2F%2Ffalser101.github.io%2F2024%2F11%2F13%2Fpulsar%2F%25E6%25B6%2588%25E6%2581%25AF%25E9%2587%258D%25E8%25AF%2595%25E7%259A%2584%25E4%25B8%2589%25E7%25A7%258D%25E6%2596%25B9%25E5%25BC%258F%25E8%25A7%25A3%25E6%259E%2590%2F + '" target="_blank" title="Twitter">
+            <i class="iconfont icon-twitter"></i>
+          </a>
+        
+        
+          <a class="share-item" href="https://www.facebook.com/sharer.php?u=https://falser101.github.io/2024/11/13/pulsar/%E6%B6%88%E6%81%AF%E9%87%8D%E8%AF%95%E7%9A%84%E4%B8%89%E7%A7%8D%E6%96%B9%E5%BC%8F%E8%A7%A3%E6%9E%90/" target="_blank" title="Facebook">
+            <i class="iconfont icon-facebooksquare"></i>
+          </a>
+        
+      </div>
+    </div>
+  
+  
+<script src="/js/shares.js"></script>
+
+
+
+      </div>
+    </div>
+  </body>
+</html>
