@@ -157,7 +157,7 @@
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="Update time"></i>
-          2024-11-13 11:22:42
+          2024-11-13 11:30:07
         </span>
         
               <span class="post-tags">
@@ -173,11 +173,19 @@
           
       </div>
       <div class="markdown-body">
-        <pre><code>要利用消息重新交付，您需要在Broke重新发送Apache Pulsar客户端中未确认的消息之前启用此机制。可以使用三种方法激活Apache Pulsar中的消息重新传递机制。
+        <pre><code>要利用消息重新交付，您需要在Broke重新发送Apache Pulsar客户端中未确认的消息之前启用此机制。
+可以使用三种方法激活Apache Pulsar中的消息重新传递机制。
 </code></pre>
-<h1 id="主动重试"><a href="#主动重试" class="headerlink" title="主动重试"></a>主动重试</h1><pre><code>重试主题允许您存储未能使用的消息，并在以后重试使用它们。使用此方法，可以自定义重新传递消息的间隔。原始主题的消费者也会自动订阅重试信主题。一旦达到最大重试次数，未使用的消息将被移动到死信主题进行手动处理。重试信主题的功能由使用者实现。
-![pulsar-broker-startup](/images/pulsar/message-redelivery/主动重试.svg)
+<ul>
+<li>Negative Acknowledgment -&gt; 否定确认</li>
+<li>Acknowledgment Timeout -&gt; 确认超时</li>
+<li>Retry letter topic -&gt; 重试消费</li>
+</ul>
+<h1 id="主动重试"><a href="#主动重试" class="headerlink" title="主动重试"></a>主动重试</h1><pre><code>重试信主题允许您存储未能使用的消息，并在以后重试使用它们。使用此方法，可以自定义重新传递消息的间隔。
+原始主题的消费者也会自动订阅重试信主题。一旦达到最大重试次数，未使用的消息将被移动到死信主题进行手动处理。
+重试信主题的功能由使用者实现。
 </code></pre>
+<p><img src="/images/pulsar/message-redelivery/%E4%B8%BB%E5%8A%A8%E9%87%8D%E8%AF%95.svg" alt="pulsar-broker-startup"></p>
 <h2 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">PulsarClient</span> <span class="variable">pulsarClient</span> <span class="operator">=</span> PulsarClient.builder().serviceUrl(<span class="string">&quot;pulsar://localhost:6650&quot;</span>).build();</span><br><span class="line"></span><br><span class="line">Consumer&lt;<span class="type">byte</span>[]&gt; consumer = pulsarClient.newConsumer() <span class="comment">//</span></span><br><span class="line">        .topic(<span class="string">&quot;persistent://my-tenant/my-ns/my-topic&quot;</span>) <span class="comment">//</span></span><br><span class="line">        .enableRetry(<span class="literal">true</span>)</span><br><span class="line">        .subscriptionName(<span class="string">&quot;my-subscription-name&quot;</span>).subscribe();</span><br><span class="line"></span><br><span class="line">Message&lt;<span class="type">byte</span>[]&gt; msg = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) &#123;</span><br><span class="line">    msg = consumer.receive();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Acknowledge the consumption of all messages at once</span></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    consumer.acknowledgeCumulative(msg);</span><br><span class="line">&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">    consumer.reconsumeLater(msg, <span class="number">10</span>, TimeUnit.SECONDS);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">pulsarClient.close();</span><br></pre></td></tr></table></figure>
 
 <h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><p><code>Consumer</code>接口</p>
@@ -275,7 +283,7 @@
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="Update time"></i>
-              2024-11-13 11:22:42
+              2024-11-13 11:30:07
             </span>
             
                   <span class="post-tags">
