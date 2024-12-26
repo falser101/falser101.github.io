@@ -45,7 +45,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://unpkg.com/volantis-static@0.0.1654736714924/media/org.volantis/blog/favicon/android-chrome-192x192.png">
 <meta property="article:published_time" content="2024-08-13T16:00:00.000Z">
-<meta property="article:modified_time" content="2024-09-11T06:38:01.835Z">
+<meta property="article:modified_time" content="2024-12-26T02:17:58.452Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="linux">
 <meta property="article:tag" content="iptables">
@@ -1978,7 +1978,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     debug: false,
     cdn: {"js":{"app":"/js/app.js","parallax":"/js/plugins/parallax.js","rightMenu":"/js/plugins/rightMenu.js","rightMenus":"/js/plugins/rightMenus.js","sites":"/js/plugins/tags/sites.js","friends":"/js/plugins/tags/friends.js","contributors":"/js/plugins/tags/contributors.js","search":"/js/search/hexo.js"},"css":{"style":"/css/style.css"}},
     default: {"avatar":"https://unpkg.com/volantis-static@0.0.1654736714924/media/placeholder/avatar/round/3442075.svg","link":"https://unpkg.com/volantis-static@0.0.1654736714924/media/placeholder/link/8f277b4ee0ecd.svg","cover":"https://unpkg.com/volantis-static@0.0.1654736714924/media/placeholder/cover/76b86c0226ffd.svg","image":"https://unpkg.com/volantis-static@0.0.1654736714924/media/placeholder/image/2659360.svg"},
-    lastupdate: new Date(1735179196080),
+    lastupdate: new Date(1735180067900),
     sidebar: {
       for_page: ["post","category","guide"],
       for_post: ["toc"],
@@ -2807,7 +2807,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
   <div id="layoutHelper-page-plugins"></div>
   <div id="post-body" itemprop="articleBody">
-    <h1 id="防火墙相关概念"><a href="#防火墙相关概念" class="headerlink" title="防火墙相关概念"></a>防火墙相关概念</h1><p>iptables其实不是真正的防火墙，我们可以把它理解成一个客户端代理，用户通过iptables这个代理，将用户的安全设定执行到对应的”安全框架”中，这个”安全框架”才是真正的防火墙，这个框架的名字叫netfilter</p>
+    <div class="story post-story"><h2 id="防火墙相关概念"><a href="#防火墙相关概念" class="headerlink" title="防火墙相关概念"></a>防火墙相关概念</h2><p>iptables其实不是真正的防火墙，我们可以把它理解成一个客户端代理，用户通过iptables这个代理，将用户的安全设定执行到对应的”安全框架”中，这个”安全框架”才是真正的防火墙，这个框架的名字叫netfilter</p>
 <p>netfilter才是防火墙真正的安全框架（framework），netfilter位于内核空间。</p>
 <p>iptables其实是一个命令行工具，位于用户空间，我们用这个工具操作真正的框架。</p>
 <p>netfilter&#x2F;iptables（下文中简称为iptables）组成Linux平台下的包过滤防火墙，与大多数的Linux软件一样，这个包过滤防火墙是免费的，它可以代替昂贵的商业防火墙解决方案，完成封包过滤、封包重定向和网络地址转换（NAT）等功能。</p>
@@ -2821,7 +2821,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 </li>
 </ul>
 <p>所以说，虽然我们使用service iptables start启动iptables”服务”，但是其实准确的来说，iptables并没有一个守护进程，所以并不能算是真正意义上的服务，而应该算是内核提供的功能。</p>
-<h1 id="iptables基础"><a href="#iptables基础" class="headerlink" title="iptables基础"></a>iptables基础</h1><p>我们知道iptables是按照规则来办事的，我们就来说说规则（rules），规则其实就是网络管理员预定义的条件，规则一般的定义为”如果数据包头符合这样的条件，就这样处理这个数据包”。规则存储在内核空间的信息包过滤表中，这些规则分别指定了源地址、目的地址、传输协议（如TCP、UDP、ICMP）和服务类型（如HTTP、FTP和SMTP）等。当数据包与规则匹配时，iptables就根据规则所定义的方法来处理这些数据包，如放行（accept）、拒绝（reject）和丢弃（drop）等。配置防火墙的主要工作就是添加、修改和删除这些规则。</p>
+</div><div class="story post-story"><h2 id="iptables基础"><a href="#iptables基础" class="headerlink" title="iptables基础"></a>iptables基础</h2><p>我们知道iptables是按照规则来办事的，我们就来说说规则（rules），规则其实就是网络管理员预定义的条件，规则一般的定义为”如果数据包头符合这样的条件，就这样处理这个数据包”。规则存储在内核空间的信息包过滤表中，这些规则分别指定了源地址、目的地址、传输协议（如TCP、UDP、ICMP）和服务类型（如HTTP、FTP和SMTP）等。当数据包与规则匹配时，iptables就根据规则所定义的方法来处理这些数据包，如放行（accept）、拒绝（reject）和丢弃（drop）等。配置防火墙的主要工作就是添加、修改和删除这些规则。</p>
 <p>当客户端访问服务器的web服务时，客户端发送报文到网卡，而tcp&#x2F;ip协议栈是属于内核的一部分，所以，客户端的信息会通过内核的TCP协议传输到用户空间中的web服务中，而此时，客户端报文的目标终点为web服务所监听的套接字（IP：Port）上，当web服务需要响应客户端请求时，web服务发出的响应报文的目标终点则为客户端，这个时候，web服务所监听的IP与端口反而变成了原点，我们说过，netfilter才是真正的防火墙，它是内核的一部分，所以，如果我们想要防火墙能够达到”防火”的目的，则需要在内核中设置关卡，所有进出的报文都要通过这些关卡，经过检查后，符合放行条件的才能放行，符合阻拦条件的则需要被阻止，于是，就出现了input关卡和output关卡，而这些关卡在iptables中不被称为”关卡”,而被称为”链”。</p>
 <p><img src="/imgs/linux/2024/02/021217_0051_1.png" class="lazyload" data-srcset="/imgs/linux/2024/02/021217_0051_1.png" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="示意图"></p>
 <p>其实我们上面描述的场景并不完善，因为客户端发来的报文访问的目标地址可能并不是本机，而是其他服务器，当本机的内核支持IP_FORWARD时，我们可以将报文转发给其他服务器，所以，这个时候，我们就会提到iptables中的其他”关卡”，也就是其他”链”，他们就是  “路由前”、”转发”、”路由后”，他们的英文名是</p>
@@ -2832,9 +2832,9 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 <p>到本机某进程的报文：PREROUTING –&gt; INPUT</p>
 <p>由本机转发的报文：PREROUTING –&gt; FORWARD –&gt; POSTROUTING</p>
 <p>由本机的某进程发出报文（通常为响应报文）：OUTPUT –&gt; POSTROUTING</p>
-<h1 id="链的概念"><a href="#链的概念" class="headerlink" title="链的概念"></a>链的概念</h1><p>现在，我们想象一下，这些”关卡”在iptables中为什么被称作”链”呢？我们知道，防火墙的作用就在于对经过的报文匹配”规则”，然后执行对应的”动作”,所以，当报文经过这些关卡的时候，则必须匹配这个关卡上的规则，但是，这个关卡上可能不止有一条规则，而是有很多条规则，当我们把这些规则串到一个链条上的时候，就形成了”链”,所以，我们把每一个”关卡”想象成如下图中的模样  ，这样来说，把他们称为”链”更为合适，每个经过这个”关卡”的报文，都要将这条”链”上的所有规则匹配一遍，如果有符合条件的规则，则执行规则对应的动作。</p>
+</div><div class="story post-story"><h2 id="链的概念"><a href="#链的概念" class="headerlink" title="链的概念"></a>链的概念</h2><p>现在，我们想象一下，这些”关卡”在iptables中为什么被称作”链”呢？我们知道，防火墙的作用就在于对经过的报文匹配”规则”，然后执行对应的”动作”,所以，当报文经过这些关卡的时候，则必须匹配这个关卡上的规则，但是，这个关卡上可能不止有一条规则，而是有很多条规则，当我们把这些规则串到一个链条上的时候，就形成了”链”,所以，我们把每一个”关卡”想象成如下图中的模样  ，这样来说，把他们称为”链”更为合适，每个经过这个”关卡”的报文，都要将这条”链”上的所有规则匹配一遍，如果有符合条件的规则，则执行规则对应的动作。</p>
 <p><img src="/imgs/linux/2024/02/021217_0051_3.png" class="lazyload" data-srcset="/imgs/linux/2024/02/021217_0051_3.png" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="示意图"></p>
-<h1 id="表的概念"><a href="#表的概念" class="headerlink" title="表的概念"></a>表的概念</h1><p>我们再想想另外一个问题，我们对每个”链”上都放置了一串规则，但是这些规则有些很相似，比如，A类规则都是对IP或者端口的过滤，B类规则是修改报文，那么这个时候，我们是不是能把实现相同功能的规则放在一起呢，必须能的。</p>
+</div><div class="story post-story"><h2 id="表的概念"><a href="#表的概念" class="headerlink" title="表的概念"></a>表的概念</h2><p>我们再想想另外一个问题，我们对每个”链”上都放置了一串规则，但是这些规则有些很相似，比如，A类规则都是对IP或者端口的过滤，B类规则是修改报文，那么这个时候，我们是不是能把实现相同功能的规则放在一起呢，必须能的。</p>
 <p>我们把具有相同功能的规则的集合叫做”表”，所以说，不同功能的规则，我们可以放置在不同的表中进行管理，而iptables已经为我们定义了4种表，每种表对应了不同的功能，而我们定义的规则也都逃脱不了这4种功能的范围，所以，学习iptables之前，我们必须先搞明白每种表 的作用。</p>
 <p>iptables为我们提供了如下规则的分类，或者说，iptables为我们提供了如下”表”</p>
 <p>filter表：负责过滤功能，防火墙；内核模块：iptables_filter</p>
@@ -2842,7 +2842,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 <p>mangle表：拆解报文，做出修改，并重新封装 的功能；iptable_mangle</p>
 <p>raw表：关闭nat表上启用的连接追踪机制；iptable_raw</p>
 <p>也就是说，我们自定义的所有规则，都是这四种分类中的规则，或者说，所有规则都存在于这4张”表”中。</p>
-<h1 id="表链关系"><a href="#表链关系" class="headerlink" title="表链关系"></a>表链关系</h1><p>但是我们需要注意的是，某些”链”中注定不会包含”某类规则”，就像某些”关卡”天生就不具备某些功能一样，比如，A”关卡”只负责打击陆地敌人，没有防空能力，B”关卡”只负责打击空中敌人，没有防御步兵的能力，C”关卡”可能比较NB，既能防空，也能防御陆地敌人，D”关卡”最屌，海陆空都能防。</p>
+</div><div class="story post-story"><h2 id="表链关系"><a href="#表链关系" class="headerlink" title="表链关系"></a>表链关系</h2><p>但是我们需要注意的是，某些”链”中注定不会包含”某类规则”，就像某些”关卡”天生就不具备某些功能一样，比如，A”关卡”只负责打击陆地敌人，没有防空能力，B”关卡”只负责打击空中敌人，没有防御步兵的能力，C”关卡”可能比较NB，既能防空，也能防御陆地敌人，D”关卡”最屌，海陆空都能防。</p>
 <p>那让我们来看看，每个”关卡”都有哪些能力，或者说，让我们看看每个”链”上的规则都存在于哪些”表”中。</p>
 <p>我们还是以图为例，先看看prerouting”链”上的规则都存在于哪些表中。</p>
 <p>注意：下图只用于说明prerouting链上的规则存在于哪些表中，并没有描述表的顺序。</p>
@@ -2870,7 +2870,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 <p>raw –&gt; mangle –&gt; nat –&gt; filter</p>
 <p>但是我们前面说过，某些链天生就不能使用某些表中的规则，所以，4张表中的规则处于同一条链的目前只有output链，它就是传说中海陆空都能防守的关卡。</p>
 <p>为了更方便的管理，我们还可以在某个表里面创建自定义链，将针对某个应用程序所设置的规则放置在这个自定义链中，但是自定义链接不能直接使用，只能被某个默认的链当做动作去调用才能起作用，我们可以这样想象，自定义链就是一段比较”短”的链子，这条”短”链子上的规则都是针对某个应用程序制定的，但是这条短的链子并不能直接使用，而是需要”焊接”在iptables默认定义链子上，才能被IPtables使用，这就是为什么默认定义的”链”需要把”自定义链”当做”动作”去引用的原因。这是后话，后面再聊，在实际使用时我们即可更加的明白。</p>
-<h1 id="数据经过防火墙的流程"><a href="#数据经过防火墙的流程" class="headerlink" title="数据经过防火墙的流程"></a>数据经过防火墙的流程</h1><p>结合上述所有的描述，我们可以将数据包通过防火墙的流程总结为下图：</p>
+</div><div class="story post-story"><h2 id="数据经过防火墙的流程"><a href="#数据经过防火墙的流程" class="headerlink" title="数据经过防火墙的流程"></a>数据经过防火墙的流程</h2><p>结合上述所有的描述，我们可以将数据包通过防火墙的流程总结为下图：</p>
 <p><img src="/imgs/linux/2024/02/021217_0051_6.png" class="lazyload" data-srcset="/imgs/linux/2024/02/021217_0051_6.png" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="示意图"></p>
 <p>我们在写Iptables规则的时候，要时刻牢记这张路由次序图，灵活配置规则。</p>
 <p>我们将经常用到的对应关系重新写在此处，方便对应图例查看。</p>
@@ -2887,7 +2887,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 <p>filter  表中的规则可以被哪些链使用：INPUT，FORWARD，OUTPUT</p>
 <p>下图中nat表在centos7中的情况就不再标明。</p>
 <p><img src="/imgs/linux/2024/02/021217_0051_7.png" class="lazyload" data-srcset="/imgs/linux/2024/02/021217_0051_7.png" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="示意图"></p>
-<h1 id="规则的概念"><a href="#规则的概念" class="headerlink" title="规则的概念"></a>规则的概念</h1><p>说了一圈又说回来了，在上述描述中我们一直在提规则，可是没有细说，现在说说它。</p>
+</div><div class="story post-story"><h2 id="规则的概念"><a href="#规则的概念" class="headerlink" title="规则的概念"></a>规则的概念</h2><p>说了一圈又说回来了，在上述描述中我们一直在提规则，可是没有细说，现在说说它。</p>
 <p>先说说规则的概念，然后再通俗的解释它。</p>
 <p>规则：根据指定的匹配条件来尝试匹配每个流经此处的报文，一旦匹配成功，则由规则后面指定的处理动作进行处理；</p>
 <p>那么我们来通俗的解释一下什么是iptables的规则，之前打过一个比方，每条”链”都是一个”关卡”，每个通过这个”关卡”的报文都要匹配这个关卡上的规则，如果匹配，则对报文进行对应的处理，比如说，你我二人此刻就好像两个”报文”，你我二人此刻都要入关，可是城主有命，只有器宇轩昂的人才能入关，不符合此条件的人不能入关，于是守关将士按照城主制定的”规则”，开始打量你我二人，最终，你顺利入关了，而我已被拒之门外，因为你符合”器宇轩昂”的标准，所以把你”放行”了，而我不符合标准，所以没有被放行，其实，”器宇轩昂”就是一种”匹配条件”，”放行”就是一种”动作”，”匹配条件”与”动作”组成了规则。</p>
@@ -2912,7 +2912,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 <p>REDIRECT：在本机做端口映射。</p>
 <p>LOG：在&#x2F;var&#x2F;log&#x2F;messages文件中记录日志信息，然后将数据包传递给下一条规则，也就是说除了记录以外不对数据包做任何其他操作，仍然让下一条规则去匹配。</p>
 
-
+</div>
   </div>
   
   
@@ -3040,7 +3040,7 @@ archlinux安装waydroid
 
 
     <div class='content'>
-        
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%98%B2%E7%81%AB%E5%A2%99%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5"><span class="toc-number">1.</span> <span class="toc-text">防火墙相关概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#iptables%E5%9F%BA%E7%A1%80"><span class="toc-number">2.</span> <span class="toc-text">iptables基础</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%93%BE%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="toc-number">3.</span> <span class="toc-text">链的概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A1%A8%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="toc-number">4.</span> <span class="toc-text">表的概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A1%A8%E9%93%BE%E5%85%B3%E7%B3%BB"><span class="toc-number">5.</span> <span class="toc-text">表链关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%8F%E8%BF%87%E9%98%B2%E7%81%AB%E5%A2%99%E7%9A%84%E6%B5%81%E7%A8%8B"><span class="toc-number">6.</span> <span class="toc-text">数据经过防火墙的流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%84%E5%88%99%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="toc-number">7.</span> <span class="toc-text">规则的概念</span></a></li></ol>
     </div>
   </section>
 
@@ -3934,7 +3934,7 @@ window.matchMedia('(prefers-color-scheme: light)').addListener(darkModelListener
 
 
   <script>
-  let imgs = ["https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/002.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/056.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/039.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/054.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/033.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/051.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/052.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/019.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/005.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/042.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/046.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/003.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/012.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/035.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/004.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/016.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/006.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/034.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/001.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/038.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/025.webp"];
+  let imgs = ["https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/004.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/016.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/002.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/005.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/046.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/025.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/033.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/019.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/012.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/003.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/001.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/056.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/042.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/051.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/034.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/039.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/054.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/035.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/006.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/038.webp","https://unpkg.com/volantis-static@0.0.1654736714924/media/wallpaper/minimalist/2020/052.webp"];
   let index = 0;
   let IntervalParallax = null;
 
@@ -4253,7 +4253,7 @@ window.matchMedia('(prefers-color-scheme: light)').addListener(darkModelListener
 </script>
 
 
-  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Hexo","url":"https://falser101.github.io/","logo":{"@type":"ImageObject","url":"https://unpkg.com/volantis-static@0.0.1654736714924/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"John Doe","image":{"@type":"ImageObject","url":"https://unpkg.com/volantis-static@0.0.1654736714924/media/org.volantis/blog/favicon/android-chrome-192x192.png"},"url":"https://falser101.github.io/","sameAs":["https://github.com/volantis-x"],"description":"Geek Zhang的个人网站，记录程序员工作、学习、生活相关的日志，包括linux、k8s、黑苹果、hackintosh、pulsar、Java、golang"},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"https://falser101.github.io/","name":"Hexo"}},{"@type":"ListItem","position":2,"item":{"@id":"https://falser101.github.io/categories/linux/","name":"linux"}},{"@type":"ListItem","position":3,"item":{"@id":"https://falser101.github.io/2024/08/14/linux/2024/02.iptables基本概念/","name":"iptables基本概念"}}]},{"@context":"http://schema.org","@type":"WebSite","name":"Hexo","url":"https://falser101.github.io/","keywords":null,"description":"Geek Zhang的个人网站，记录程序员工作、学习、生活相关的日志，包括linux、k8s、黑苹果、hackintosh、pulsar、Java、golang","author":{"@type":"Person","name":"John Doe","image":{"@type":"ImageObject","url":"https://unpkg.com/volantis-static@0.0.1654736714924/media/org.volantis/blog/favicon/android-chrome-192x192.png"},"url":"https://falser101.github.io/","description":"Geek Zhang的个人网站，记录程序员工作、学习、生活相关的日志，包括linux、k8s、黑苹果、hackintosh、pulsar、Java、golang"},"publisher":{"@type":"Organization","name":"Hexo","url":"https://falser101.github.io/","logo":{"@type":"ImageObject","url":"https://unpkg.com/volantis-static@0.0.1654736714924/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"potentialAction":{"@type":"SearchAction","name":"Site Search","target":{"@type":"EntryPoint","urlTemplate":"https://falser101.github.io?s={search_term_string}"},"query-input":"required name=search_term_string"}},{"@context":"http://schema.org","@type":"BlogPosting","headline":"iptables基本概念","description":"iptables基本概念","inLanguage":"en","mainEntityOfPage":{"@type":"WebPage","@id":"https://falser101.github.io/2024/08/14/linux/2024/02.iptables%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/"},"author":{"@type":"Person","name":"John Doe","image":{"@type":"ImageObject","url":"https://unpkg.com/volantis-static@0.0.1654736714924/media/org.volantis/blog/favicon/android-chrome-192x192.png"},"url":"https://falser101.github.io/"},"publisher":{"@type":"Organization","name":"Hexo","logo":{"@type":"ImageObject","url":"https://unpkg.com/volantis-static@0.0.1654736714924/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"url":"https://falser101.github.io/2024/08/14/linux/2024/02.iptables%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/","wordCount":0,"datePublished":"2024-08-13T16:00:00.000Z","dateModified":"2024-09-11T06:38:01.835Z","articleSection":"linux","keywords":"linux,iptables","image":{"@type":"ImageObject","url":"https://unpkg.com/volantis-static@0.0.1654736714924/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}}]</script>
+  <script type="application/ld+json">[{"@context":"http://schema.org","@type":"Organization","name":"Hexo","url":"https://falser101.github.io/","logo":{"@type":"ImageObject","url":"https://unpkg.com/volantis-static@0.0.1654736714924/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},{"@context":"http://schema.org","@type":"Person","name":"John Doe","image":{"@type":"ImageObject","url":"https://unpkg.com/volantis-static@0.0.1654736714924/media/org.volantis/blog/favicon/android-chrome-192x192.png"},"url":"https://falser101.github.io/","sameAs":["https://github.com/volantis-x"],"description":"Geek Zhang的个人网站，记录程序员工作、学习、生活相关的日志，包括linux、k8s、黑苹果、hackintosh、pulsar、Java、golang"},{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"https://falser101.github.io/","name":"Hexo"}},{"@type":"ListItem","position":2,"item":{"@id":"https://falser101.github.io/categories/linux/","name":"linux"}},{"@type":"ListItem","position":3,"item":{"@id":"https://falser101.github.io/2024/08/14/linux/2024/02.iptables基本概念/","name":"iptables基本概念"}}]},{"@context":"http://schema.org","@type":"WebSite","name":"Hexo","url":"https://falser101.github.io/","keywords":null,"description":"Geek Zhang的个人网站，记录程序员工作、学习、生活相关的日志，包括linux、k8s、黑苹果、hackintosh、pulsar、Java、golang","author":{"@type":"Person","name":"John Doe","image":{"@type":"ImageObject","url":"https://unpkg.com/volantis-static@0.0.1654736714924/media/org.volantis/blog/favicon/android-chrome-192x192.png"},"url":"https://falser101.github.io/","description":"Geek Zhang的个人网站，记录程序员工作、学习、生活相关的日志，包括linux、k8s、黑苹果、hackintosh、pulsar、Java、golang"},"publisher":{"@type":"Organization","name":"Hexo","url":"https://falser101.github.io/","logo":{"@type":"ImageObject","url":"https://unpkg.com/volantis-static@0.0.1654736714924/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"potentialAction":{"@type":"SearchAction","name":"Site Search","target":{"@type":"EntryPoint","urlTemplate":"https://falser101.github.io?s={search_term_string}"},"query-input":"required name=search_term_string"}},{"@context":"http://schema.org","@type":"BlogPosting","headline":"iptables基本概念","description":"iptables基本概念","inLanguage":"en","mainEntityOfPage":{"@type":"WebPage","@id":"https://falser101.github.io/2024/08/14/linux/2024/02.iptables%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/"},"author":{"@type":"Person","name":"John Doe","image":{"@type":"ImageObject","url":"https://unpkg.com/volantis-static@0.0.1654736714924/media/org.volantis/blog/favicon/android-chrome-192x192.png"},"url":"https://falser101.github.io/"},"publisher":{"@type":"Organization","name":"Hexo","logo":{"@type":"ImageObject","url":"https://unpkg.com/volantis-static@0.0.1654736714924/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}},"url":"https://falser101.github.io/2024/08/14/linux/2024/02.iptables%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/","wordCount":0,"datePublished":"2024-08-13T16:00:00.000Z","dateModified":"2024-12-26T02:17:58.452Z","articleSection":"linux","keywords":"linux,iptables","image":{"@type":"ImageObject","url":"https://unpkg.com/volantis-static@0.0.1654736714924/media/org.volantis/blog/favicon/android-chrome-192x192.png","width":192,"height":192}}]</script>
 
 
 
