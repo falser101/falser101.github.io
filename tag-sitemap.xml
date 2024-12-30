@@ -3,14 +3,21 @@
 
 
     <url>
-        <loc>https://falser101.github.io/tags/iptables/</loc>
-        <lastmod>2024-12-26T03:03:41.579Z</lastmod>
+        <loc>https://falser101.github.io/tags/linux/</loc>
+        <lastmod>2024-12-30T07:32:16.013Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
-        <loc>https://falser101.github.io/tags/linux/</loc>
+        <loc>https://falser101.github.io/tags/wayland/</loc>
+        <lastmod>2024-12-30T07:32:16.013Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://falser101.github.io/tags/iptables/</loc>
         <lastmod>2024-12-26T03:03:41.579Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
